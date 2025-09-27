@@ -40,7 +40,7 @@ class AIInsight(Base):
     expires_at = Column(DateTime(timezone=True), nullable=True)
     
     # Relationships
-    project = relationship("Project", back_populates="ai_insights")
+    project = relationship("Project")
     acknowledged_by_user = relationship("User", foreign_keys=[acknowledged_by])
 
 class ProjectAnalytics(Base):
@@ -98,6 +98,7 @@ class AIInsightUpdate(BaseModel):
 class AIInsightResponse(AIInsightBase):
     id: int
     project_id: int
+    project_name: Optional[str] = None
     is_acknowledged: bool
     acknowledged_by: Optional[int] = None
     acknowledged_at: Optional[datetime] = None
@@ -131,27 +132,55 @@ class ProjectAnalyticsResponse(ProjectAnalyticsBase):
     class Config:
         from_attributes = True
 
+class ProjectInfo(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    status: str
+    created_at: datetime
+    deadline: Optional[datetime] = None
+
 class RiskAssessment(BaseModel):
+    project_info: ProjectInfo
     overall_risk_score: float
+    risk_level: str  # "Bajo", "Medio", "Alto", "Crítico"
     risk_factors: List[Dict[str, Any]]
     recommendations: List[str]
     critical_issues: List[str]
+    risk_categories: Dict[str, float]  # {"technical": 0.2, "timeline": 0.5, "resources": 0.3}
+    mitigation_strategies: List[Dict[str, str]]
+    impact_assessment: Dict[str, Any]
 
 class ProgressPrediction(BaseModel):
+    project_info: ProjectInfo
     predicted_completion_date: datetime
     confidence_level: float
+    completion_probability: float  # Probabilidad de completar a tiempo
     factors_affecting_timeline: List[str]
     recommended_actions: List[str]
+    milestone_predictions: List[Dict[str, Any]]
+    velocity_analysis: Dict[str, float]
+    timeline_scenarios: Dict[str, Dict[str, Any]]  # optimistic, realistic, pessimistic
 
 class TeamPerformanceAnalysis(BaseModel):
+    project_info: ProjectInfo
     team_velocity: float
+    team_efficiency_score: float  # 0-100
     individual_performance: List[Dict[str, Any]]
     bottlenecks: List[str]
     optimization_suggestions: List[str]
+    performance_trends: Dict[str, List[float]]
+    collaboration_metrics: Dict[str, float]
+    skill_gap_analysis: List[Dict[str, str]]
+    workload_distribution: Dict[str, float]
 
 class BudgetForecast(BaseModel):
+    project_info: ProjectInfo
     projected_total_cost: float
     current_utilization: float
     cost_variance: float
     budget_alerts: List[str]
     cost_optimization_tips: List[str]
+    cost_breakdown: Dict[str, float]
+    spending_trends: List[Dict[str, Any]]
+    roi_analysis: Dict[str, float]

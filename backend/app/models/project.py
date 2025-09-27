@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, Enum, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from pydantic import BaseModel
@@ -31,16 +31,15 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     start_date = Column(DateTime(timezone=True), nullable=True)
     end_date = Column(DateTime(timezone=True), nullable=True)
-    budget = Column(Integer, nullable=True)  # Budget in cents
+    budget = Column(Float, nullable=True)  # Budget in dollars
     is_public = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
-    owner = relationship("User", back_populates="owned_projects", foreign_keys=[owner_id])
+    owner = relationship("User", back_populates="owned_projects")
     tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
     members = relationship("ProjectMember", back_populates="project", cascade="all, delete-orphan")
-    ai_insights = relationship("AIInsight", back_populates="project", cascade="all, delete-orphan")
 
 class ProjectMember(Base):
     __tablename__ = "project_members"
@@ -63,7 +62,7 @@ class ProjectBase(BaseModel):
     priority: Optional[ProjectPriority] = ProjectPriority.MEDIUM
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    budget: Optional[int] = None
+    budget: Optional[float] = None
     is_public: Optional[bool] = False
 
 class ProjectCreate(ProjectBase):
@@ -76,7 +75,7 @@ class ProjectUpdate(BaseModel):
     priority: Optional[ProjectPriority] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    budget: Optional[int] = None
+    budget: Optional[float] = None
     is_public: Optional[bool] = None
 
 class ProjectMemberBase(BaseModel):

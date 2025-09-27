@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Auth Storage</title>
+</head>
+<body>
+    <h1>Debug Authentication Storage</h1>
+    <button onclick="checkStorage()">Check localStorage</button>
+    <pre id="output"></pre>
+
+    <script>
+        function checkStorage() {
+            const output = document.getElementById('output');
+            const authStorage = localStorage.getItem('auth-storage');
+            
+            output.textContent = 'Raw auth-storage:\n' + authStorage + '\n\n';
+            
+            if (authStorage) {
+                try {
+                    const parsed = JSON.parse(authStorage);
+                    output.textContent += 'Parsed structure:\n' + JSON.stringify(parsed, null, 2) + '\n\n';
+                    
+                    // Check different possible paths
+                    output.textContent += 'Token paths:\n';
+                    output.textContent += 'parsed.token: ' + parsed.token + '\n';
+                    output.textContent += 'parsed.state?.token: ' + parsed.state?.token + '\n';
+                    output.textContent += 'parsed.state?.state?.token: ' + parsed.state?.state?.token + '\n';
+                } catch (error) {
+                    output.textContent += 'Error parsing: ' + error.message;
+                }
+            } else {
+                output.textContent += 'No auth-storage found in localStorage';
+            }
+        }
+        
+        // Auto-check on load
+        window.onload = checkStorage;
+    </script>
+</body>
+</html>

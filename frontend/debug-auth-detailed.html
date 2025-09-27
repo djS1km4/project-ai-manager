@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Debug - Detailed</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .token { word-break: break-all; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Auth Debug - Detailed Analysis</h1>
+    
+    <div class="section info">
+        <h3>Current Status</h3>
+        <div id="status">Checking...</div>
+    </div>
+
+    <div class="section">
+        <h3>Actions</h3>
+        <button onclick="checkAuth()">Check Auth Status</button>
+        <button onclick="loginTest()">Test Login</button>
+        <button onclick="testCreateProject()">Test Create Project</button>
+        <button onclick="clearAuth()">Clear Auth</button>
+        <button onclick="checkProjects()">Check Projects</button>
+    </div>
+
+    <div class="section">
+        <h3>Results</h3>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001/api/v1';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function checkAuth() {
+            const authStorage = localStorage.getItem('auth-storage');
+            log('=== AUTH STATUS CHECK ===');
+            
+            if (!authStorage) {
+                log('❌ No auth-storage found in localStorage', 'error');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(authStorage);
+                log(`✅ Auth storage found: <pre>${JSON.stringify(parsed, null, 2)}</pre>`);
+                
+                const token = parsed.state?.token;
+                const isAuthenticated = parsed.state?.isAuthenticated;
+                const user = parsed.state?.user;
+
+                if (token && isAuthenticated) {
+                    log(`✅ Token exists: ${token.substring(0, 50)}...`, 'success');
+                    log(`✅ Is authenticated: ${isAuthenticated}`, 'success');
+                    log(`✅ User: ${JSON.stringify(user, null, 2)}`, 'success');
+                    
+                    // Decode JWT token
+                    try {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        log(`✅ Token payload: <pre>${JSON.stringify(payload, null, 2)}</pre>`);
+                        
+                        const now = Math.floor(Date.now() / 1000);
+                        if (payload.exp < now) {
+                            log(`❌ Token is EXPIRED! Expires: ${new Date(payload.exp * 1000)}, Now: ${new Date()}`, 'error');
+                        } else {
+                            log(`✅ Token is valid until: ${new Date(payload.exp * 1000)}`, 'success');
+                        }
+                    } catch (e) {
+                        log(`❌ Error decoding token: ${e.message}`, 'error');
+                    }
+                } else {
+                    log('❌ Missing token or not authenticated', 'error');
+                }
+            } catch (e) {
+                log(`❌ Error parsing auth storage: ${e.message}`, 'error');
+            }
+        }
+
+        async function loginTest() {
+            log('=== LOGIN TEST ===');
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'testpassword123'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Login successful! Status: ${response.status}`, 'success');
+                    log(`✅ Response: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                    
+                    // Store in localStorage like Zustand would
+                    const authData = {
+                        state: {
+                            token: data.access_token,
+                            user: data.user,
+                            isAuthenticated: true
+                        },
+                        version: 0
+                    };
+                    localStorage.setItem('auth-storage', JSON.stringify(authData));
+                    log('✅ Auth data stored in localStorage', 'success');
+                } else {
+                    log(`❌ Login failed! Status: ${response.status}`, 'error');
+                    log(`❌ Error: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateProject() {
+            log('=== CREATE PROJECT TEST ===');
+            
+            const authStorage = localStorage.getItem('auth-storage');
+            if (!authStorage) {
+                log('❌ No auth token found. Please login first.', 'error');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(authStorage);
+                const token = parsed.state?.token;
+                
+                if (!token) {
+                    log('❌ No token in auth storage', 'error');
+                    return;
+                }
+
+                const projectData = {
+                    name: 'Test Project from Debug',
+                    description: 'This is a test project created from debug page',
+                    start_date: '2025-09-25',
+                    end_date: '2025-12-25',
+                    budget: 50000,
+                    status: 'planning'
+                };
+
+                log(`📤 Sending request with token: ${token.substring(0, 50)}...`);
+                log(`📤 Project data: <pre>${JSON.stringify(projectData, null, 2)}</pre>`);
+
+                const response = await fetch(`${API_BASE}/projects/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(projectData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Project created successfully! Status: ${response.status}`, 'success');
+                    log(`✅ Response: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log(`❌ Project creation failed! Status: ${response.status}`, 'error');
+                    log(`❌ Error: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Create project error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkProjects() {
+            log('=== CHECK PROJECTS ===');
+            
+            const authStorage = localStorage.getItem('auth-storage');
+            if (!authStorage) {
+                log('❌ No auth token found. Please login first.', 'error');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(authStorage);
+                const token = parsed.state?.token;
+                
+                if (!token) {
+                    log('❌ No token in auth storage', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/projects/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Projects fetched successfully! Status: ${response.status}`, 'success');
+                    log(`✅ Projects: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log(`❌ Projects fetch failed! Status: ${response.status}`, 'error');
+                    log(`❌ Error: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Check projects error: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('auth-storage');
+            log('🗑️ Auth storage cleared', 'info');
+        }
+
+        // Auto-check on load
+        window.onload = function() {
+            checkAuth();
+        };
+    </script>
+</body>
+</html>

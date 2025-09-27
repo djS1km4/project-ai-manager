@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: project-ai-manager-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/project_manager.db
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - ENVIRONMENT=development
+      - DEBUG=true
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - project-ai-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: project-ai-manager-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - project-ai-network
+
+  # Database Service (PostgreSQL - opcional)
+  # Descomenta si quieres usar PostgreSQL en lugar de SQLite
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: project-ai-manager-db
+  #   environment:
+  #     POSTGRES_DB: project_ai_manager
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+  #   networks:
+  #     - project-ai-network
+
+networks:
+  project-ai-network:
+    driver: bridge
+
+# Volúmenes para persistencia de datos
+volumes:
+  backend_data:
+    driver: local
+  # postgres_data:
+  #   driver: local

@@ -42,10 +42,10 @@ class TaskService:
                     detail="Parent task not found or belongs to different project"
                 )
         
+        task_data = task.dict()
         db_task = Task(
-            **task.dict(),
-            creator_id=creator_id,
-            status=TaskStatus.TODO
+            **task_data,
+            creator_id=creator_id
         )
         
         db.add(db_task)
@@ -83,10 +83,18 @@ class TaskService:
         limit: int = 100
     ) -> List[Task]:
         """Get tasks with filtering options"""
-        # Base query - only tasks from projects user has access to
-        query = db.query(Task).join(Project).join(ProjectMember).filter(
-            ProjectMember.user_id == user_id
-        )
+        # Check if user is admin
+        user = db.query(User).filter(User.id == user_id).first()
+        is_admin = user and user.is_admin
+        
+        if is_admin:
+            # Admins can see all tasks
+            query = db.query(Task).join(Project)
+        else:
+            # Base query - only tasks from projects user has access to
+            query = db.query(Task).join(Project).join(ProjectMember).filter(
+                ProjectMember.user_id == user_id
+            )
         
         # Apply filters
         if project_id:
@@ -420,6 +428,17 @@ class TaskService:
     
     def _user_has_project_access(self, db: Session, project_id: int, user_id: int) -> bool:
         """Check if user has access to a project"""
+        # Check if user is admin (admins have access to all projects)
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_admin:
+            return True
+        
+        # Check if user is project owner
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if project and project.owner_id == user_id:
+            return True
+        
+        # Check if user is project member
         member = db.query(ProjectMember).filter(
             and_(ProjectMember.project_id == project_id, ProjectMember.user_id == user_id)
         ).first()

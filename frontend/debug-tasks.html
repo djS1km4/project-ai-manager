@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Tasks API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .info { background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffebee; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #e8f5e8; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input, select, textarea { margin: 5px; padding: 8px; width: 200px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Debug Tasks API</h1>
+    <div id="output"></div>
+    
+    <div class="form-group">
+        <button onclick="checkAuth()">Verificar Auth</button>
+        <button onclick="getProjects()">Obtener Proyectos</button>
+        <button onclick="getTasks()">Obtener Tareas</button>
+        <button onclick="getUsers()">Obtener Usuarios</button>
+    </div>
+
+    <h2>Crear Tarea de Prueba</h2>
+    <div class="form-group">
+        <label>Título:</label>
+        <input type="text" id="title" value="Tarea de prueba frontend" />
+    </div>
+    <div class="form-group">
+        <label>Descripción:</label>
+        <textarea id="description">Esta es una tarea de prueba desde el frontend</textarea>
+    </div>
+    <div class="form-group">
+        <label>Proyecto:</label>
+        <select id="project_id">
+            <option value="">Seleccionar proyecto...</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Asignado a:</label>
+        <select id="assignee_id">
+            <option value="">Sin asignar</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Prioridad:</label>
+        <select id="priority">
+            <option value="low">Baja</option>
+            <option value="medium" selected>Media</option>
+            <option value="high">Alta</option>
+            <option value="critical">Crítica</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Estado:</label>
+        <select id="status">
+            <option value="todo" selected>Por hacer</option>
+            <option value="in_progress">En progreso</option>
+            <option value="in_review">En revisión</option>
+            <option value="done">Completado</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Fecha límite:</label>
+        <input type="date" id="due_date" />
+    </div>
+    <div class="form-group">
+        <label>Horas estimadas:</label>
+        <input type="number" id="estimated_hours" value="5" />
+    </div>
+    <div class="form-group">
+        <button onclick="createTask()">Crear Tarea</button>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+
+        function getToken() {
+            const authStorage = localStorage.getItem('auth-storage');
+            if (!authStorage) return null;
+            
+            try {
+                const parsedAuth = JSON.parse(authStorage);
+                return parsedAuth.state?.token;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function makeRequest(url, options = {}) {
+            const token = getToken();
+            if (!token) {
+                log('❌ No hay token de autenticación', 'error');
+                return null;
+            }
+
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            const finalOptions = {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers
+                }
+            };
+
+            try {
+                const response = await fetch(url, finalOptions);
+                const data = await response.json();
+                
+                log(`🌐 ${options.method || 'GET'} ${url}: ${response.status}`, 
+                    response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    log(`📄 Error: ${JSON.stringify(data, null, 2)}`, 'error');
+                    return null;
+                }
+                
+                return data;
+            } catch (error) {
+                log(`❌ Error de red: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        async function checkAuth() {
+            document.getElementById('output').innerHTML = '';
+            const token = getToken();
+            
+            if (!token) {
+                log('❌ No hay token', 'error');
+                return;
+            }
+            
+            log('✅ Token encontrado', 'success');
+            
+            // Verificar si el token es válido haciendo una petición simple
+            const data = await makeRequest('/api/v1/auth/users');
+            if (data) {
+                log(`✅ Token válido - ${data.length} usuarios encontrados`, 'success');
+            }
+        }
+
+        async function getProjects() {
+            const data = await makeRequest('/api/v1/projects/');
+            if (data) {
+                log(`📁 Proyectos obtenidos: ${data.length}`, 'success');
+                
+                // Llenar el select de proyectos
+                const select = document.getElementById('project_id');
+                select.innerHTML = '<option value="">Seleccionar proyecto...</option>';
+                
+                data.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    select.appendChild(option);
+                });
+                
+                log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+            }
+        }
+
+        async function getTasks() {
+            const data = await makeRequest('/api/v1/tasks/');
+            if (data) {
+                log(`📋 Tareas obtenidas: ${data.length}`, 'success');
+                log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+            }
+        }
+
+        async function getUsers() {
+            const data = await makeRequest('/api/v1/auth/users');
+            if (data) {
+                log(`👥 Usuarios obtenidos: ${data.length}`, 'success');
+                
+                // Llenar el select de usuarios
+                const select = document.getElementById('assignee_id');
+                select.innerHTML = '<option value="">Sin asignar</option>';
+                
+                data.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.full_name} (${user.email})`;
+                    select.appendChild(option);
+                });
+                
+                log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+            }
+        }
+
+        async function createTask() {
+            const taskData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                project_id: parseInt(document.getElementById('project_id').value),
+                assignee_id: document.getElementById('assignee_id').value ? 
+                           parseInt(document.getElementById('assignee_id').value) : undefined,
+                priority: document.getElementById('priority').value,
+                status: document.getElementById('status').value,
+                due_date: document.getElementById('due_date').value || undefined,
+                estimated_hours: document.getElementById('estimated_hours').value ? 
+                               parseFloat(document.getElementById('estimated_hours').value) : undefined
+            };
+
+            // Limpiar valores undefined
+            Object.keys(taskData).forEach(key => {
+                if (taskData[key] === undefined || taskData[key] === '') {
+                    delete taskData[key];
+                }
+            });
+
+            log(`📤 Enviando datos de tarea:`, 'info');
+            log(`<pre>${JSON.stringify(taskData, null, 2)}</pre>`, 'info');
+
+            const data = await makeRequest('/api/v1/tasks/', {
+                method: 'POST',
+                body: JSON.stringify(taskData)
+            });
+
+            if (data) {
+                log(`✅ Tarea creada exitosamente: ${data.title} (ID: ${data.id})`, 'success');
+                log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+            }
+        }
+
+        // Auto-check auth on load
+        window.onload = checkAuth;
+    </script>
+</body>
+</html>

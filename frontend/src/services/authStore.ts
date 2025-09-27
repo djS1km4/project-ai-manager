@@ -7,6 +7,7 @@ interface User {
   email: string
   full_name: string
   is_active: boolean
+  is_admin: boolean
 }
 
 interface AuthState {
@@ -27,14 +28,9 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (email: string, password: string) => {
         try {
-          const formData = new FormData()
-          formData.append('username', email)
-          formData.append('password', password)
-
-          const response = await apiClient.post('/auth/login', formData, {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
+          const response = await apiClient.post('/auth/login', {
+            email,
+            password,
           })
 
           const { access_token, user } = response.data
@@ -44,9 +40,6 @@ export const useAuthStore = create<AuthState>()(
             user,
             isAuthenticated: true,
           })
-
-          // Set default authorization header
-          apiClient.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
         } catch (error) {
           console.error('Login failed:', error)
           throw error
@@ -59,17 +52,18 @@ export const useAuthStore = create<AuthState>()(
           token: null,
           isAuthenticated: false,
         })
-        
-        // Remove authorization header
-        delete apiClient.defaults.headers.common['Authorization']
       },
 
       register: async (email: string, password: string, fullName: string) => {
         try {
+          // Generate username from email (before @ symbol)
+          const username = email.split('@')[0]
+          
           const response = await apiClient.post('/auth/register', {
             email,
-            password,
+            username,
             full_name: fullName,
+            password,
           })
 
           const { access_token, user } = response.data
@@ -79,9 +73,6 @@ export const useAuthStore = create<AuthState>()(
             user,
             isAuthenticated: true,
           })
-
-          // Set default authorization header
-          apiClient.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
         } catch (error) {
           console.error('Registration failed:', error)
           throw error
@@ -91,8 +82,8 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       onRehydrateStorage: () => (state) => {
-        if (state?.token) {
-          apiClient.defaults.headers.common['Authorization'] = `Bearer ${state.token}`
+        if (state?.token && state?.isAuthenticated) {
+          console.log('Auth token restored from storage')
         }
       },
     }

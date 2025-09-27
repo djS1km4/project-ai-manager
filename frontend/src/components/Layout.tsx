@@ -1,13 +1,17 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../services/authStore'
+import { useNotifications } from './Notification'
 import {
   LayoutDashboard,
   FolderOpen,
   CheckSquare,
   Brain,
   LogOut,
-  User,
+  Menu,
+  X,
+  Sparkles,
+  Settings,
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -17,71 +21,111 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation()
   const { user, logout } = useAuthStore()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { addNotification, NotificationContainer } = useNotifications()
+
+  const handleLogout = () => {
+    addNotification({
+      message: 'Cerrando sesión...',
+      type: 'info',
+      duration: 2000
+    })
+    setTimeout(() => {
+      logout()
+    }, 1000)
+  }
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Projects', href: '/projects', icon: FolderOpen },
-    { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-    { name: 'AI Insights', href: '/ai-insights', icon: Brain },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, description: 'Vista general' },
+    { name: 'Proyectos', href: '/projects', icon: FolderOpen, description: 'Gestión de proyectos' },
+    { name: 'Tareas', href: '/tasks', icon: CheckSquare, description: 'Lista de tareas' },
+    { name: 'IA Insights', href: '/ai-insights', icon: Brain, description: 'Análisis inteligente' },
+    ...(user?.is_admin ? [{ name: 'Administración', href: '/admin/users', icon: Settings, description: 'Gestión de usuarios' }] : []),
   ]
 
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen gradient-bg">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-        <div className="flex h-full flex-col">
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex h-full flex-col sidebar-card m-3 mr-0 rounded-r-none">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-center border-b border-gray-200">
-            <h1 className="text-xl font-bold text-primary-600">
-              Project AI Manager
-            </h1>
+          <div className="flex h-20 items-center justify-between px-6 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="icon-container-primary">
+                <Sparkles className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-xl font-display font-bold text-gradient">
+                  Project AI
+                </h1>
+                <p className="text-xs font-sans text-secondary-500 tracking-wide">Manager</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-2 text-secondary-400 hover:text-dark-700 hover:bg-gray-100 rounded-soft transition-all duration-200"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-4 py-6">
+          <nav className="flex-1 px-4 py-6 space-y-2">
             {navigation.map((item) => {
-              const Icon = item.icon
+              const isActive = location.pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  className={`nav-item group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-soft transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white text-dark-700 soft-shadow-colored border border-primary-200'
+                      : 'text-secondary-600 hover:text-dark-700 hover:bg-gray-50 hover:soft-shadow'
                   }`}
+                  onClick={() => setSidebarOpen(false)}
                 >
-                  <Icon
-                    className={`mr-3 h-5 w-5 ${
-                      isActive(item.href)
-                        ? 'text-primary-500'
-                        : 'text-gray-400 group-hover:text-gray-500'
-                    }`}
-                  />
-                  {item.name}
+                  <item.icon className={`h-5 w-5 transition-colors duration-200 ${
+                    isActive ? 'text-primary-600' : 'text-secondary-400 group-hover:text-primary-600'
+                  }`} />
+                  <span className="font-sans tracking-wide">{item.name}</span>
+                  {isActive && (
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary-500 shadow-sm" />
+                  )}
                 </Link>
-              )
+              );
             })}
           </nav>
 
-          {/* User menu */}
+          {/* User section */}
           <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100">
-                <User className="h-4 w-4 text-primary-600" />
+            <div className="flex items-center gap-3 p-3 rounded-soft bg-white soft-shadow border border-gray-100">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-success-400 to-info-400 text-white font-semibold text-sm shadow-sm">
+                {user?.full_name?.charAt(0) || 'U'}
               </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm font-medium text-gray-700">
-                  {user?.full_name}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-dark-700 truncate">
+                  {user?.full_name || 'Usuario'}
                 </p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-xs text-secondary-500 truncate">
+                  {user?.email || 'usuario@ejemplo.com'}
+                </p>
               </div>
-              <button
-                onClick={logout}
-                className="ml-3 rounded-md p-1 text-gray-400 hover:text-gray-500"
-                title="Logout"
+              <button 
+                onClick={handleLogout}
+                className="p-2 text-secondary-400 hover:text-danger-500 hover:bg-danger-50 rounded-soft transition-all duration-200"
+                title="Cerrar sesión"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -91,13 +135,35 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Main content */}
-      <div className="pl-64">
-        <main className="py-6">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {children}
+      <div className="lg:pl-72">
+        {/* Mobile header */}
+        <div className="sticky top-0 z-40 flex h-16 items-center gap-x-4 bg-white soft-shadow border-b border-gray-200 px-4 sm:gap-x-6 sm:px-6 lg:hidden">
+          <button
+            type="button"
+            className="p-2.5 text-secondary-400 hover:text-dark-700 hover:bg-gray-100 rounded-soft transition-all duration-200"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="flex-1 text-sm font-semibold leading-6 text-dark-700">
+            Project AI Manager
           </div>
-        </main>
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-success-400 to-info-400 text-white font-semibold text-xs shadow-sm">
+              {user?.full_name?.charAt(0) || 'U'}
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:pl-0">
+          <main className="min-h-screen">
+            {children}
+          </main>
+        </div>
       </div>
+      
+      {/* Notification Container */}
+      <NotificationContainer />
     </div>
   )
 }

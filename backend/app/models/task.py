@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, validator, Field
+from typing import Optional, List, Union
 from datetime import datetime
 from enum import Enum as PyEnum
 from ..database import Base
@@ -68,8 +68,47 @@ class TaskBase(BaseModel):
     priority: Optional[TaskPriority] = TaskPriority.MEDIUM
     assignee_id: Optional[int] = None
     parent_task_id: Optional[int] = None
-    estimated_hours: Optional[int] = None
-    due_date: Optional[datetime] = None
+    estimated_hours: Optional[Union[int, float]] = None
+    due_date: Optional[Union[datetime, str]] = None
+    
+    @validator('due_date', pre=True)
+    def validate_due_date(cls, v):
+        if v is None or v == "" or v == "undefined":
+            return None
+        if isinstance(v, str):
+            if v.strip() == "":
+                return None
+            try:
+                # Try to parse different date formats
+                if 'T' in v:
+                    # ISO format with time
+                    return datetime.fromisoformat(v.replace('Z', '+00:00'))
+                else:
+                    # Date only format
+                    return datetime.strptime(v, '%Y-%m-%d')
+            except ValueError:
+                return None
+        return v
+    
+    @validator('estimated_hours', pre=True)
+    def validate_estimated_hours(cls, v):
+        if v is None or v == "" or v == "undefined":
+            return None
+        if isinstance(v, (int, float)):
+            # Convert float to int (round down)
+            return int(v) if v >= 0 else None
+        if isinstance(v, str):
+            try:
+                return int(float(v)) if float(v) >= 0 else None
+            except ValueError:
+                return None
+        return v
+    
+    @validator('description', pre=True)
+    def validate_description(cls, v):
+        if v is None or v == "" or v == "undefined":
+            return None
+        return v.strip() if isinstance(v, str) else v
 
 class TaskCreate(TaskBase):
     project_id: int
@@ -81,9 +120,62 @@ class TaskUpdate(BaseModel):
     priority: Optional[TaskPriority] = None
     assignee_id: Optional[int] = None
     parent_task_id: Optional[int] = None
-    estimated_hours: Optional[int] = None
-    actual_hours: Optional[int] = None
-    due_date: Optional[datetime] = None
+    estimated_hours: Optional[Union[int, float]] = None
+    actual_hours: Optional[Union[int, float]] = None
+    due_date: Optional[Union[datetime, str]] = None
+    
+    @validator('due_date', pre=True)
+    def validate_due_date(cls, v):
+        if v is None or v == "" or v == "undefined":
+            return None
+        if isinstance(v, str):
+            if v.strip() == "":
+                return None
+            try:
+                # Try to parse different date formats
+                if 'T' in v:
+                    # ISO format with time
+                    return datetime.fromisoformat(v.replace('Z', '+00:00'))
+                else:
+                    # Date only format
+                    return datetime.strptime(v, '%Y-%m-%d')
+            except ValueError:
+                return None
+        return v
+    
+    @validator('estimated_hours', pre=True)
+    def validate_estimated_hours(cls, v):
+        if v is None or v == "" or v == "undefined":
+            return None
+        if isinstance(v, (int, float)):
+            # Convert float to int (round down)
+            return int(v) if v >= 0 else None
+        if isinstance(v, str):
+            try:
+                return int(float(v)) if float(v) >= 0 else None
+            except ValueError:
+                return None
+        return v
+    
+    @validator('actual_hours', pre=True)
+    def validate_actual_hours(cls, v):
+        if v is None or v == "" or v == "undefined":
+            return None
+        if isinstance(v, (int, float)):
+            # Convert float to int (round down)
+            return int(v) if v >= 0 else None
+        if isinstance(v, str):
+            try:
+                return int(float(v)) if float(v) >= 0 else None
+            except ValueError:
+                return None
+        return v
+    
+    @validator('description', pre=True)
+    def validate_description(cls, v):
+        if v is None or v == "" or v == "undefined":
+            return None
+        return v.strip() if isinstance(v, str) else v
 
 class CommentBase(BaseModel):
     content: str
@@ -108,13 +200,13 @@ class CommentResponse(CommentBase):
 class TaskResponse(TaskBase):
     id: int
     project_id: int
-    creator_id: int
+    creator_id: Optional[int] = None
     actual_hours: Optional[int] = None
     completed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     assignee: Optional["UserResponse"] = None
-    creator: "UserResponse"
+    creator: Optional["UserResponse"] = None
     comments: Optional[List[CommentResponse]] = []
     subtasks: Optional[List["TaskResponse"]] = []
     

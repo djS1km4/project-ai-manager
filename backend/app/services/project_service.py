@@ -15,10 +15,14 @@ class ProjectService:
     
     def create_project(self, db: Session, project: ProjectCreate, owner_id: int) -> Project:
         """Create a new project"""
+        project_data = project.dict()
+        # Ensure status is set to PLANNING if not provided
+        if 'status' not in project_data or project_data['status'] is None:
+            project_data['status'] = ProjectStatus.PLANNING
+            
         db_project = Project(
-            **project.dict(),
-            owner_id=owner_id,
-            status=ProjectStatus.PLANNING
+            **project_data,
+            owner_id=owner_id
         )
         
         db.add(db_project)
@@ -54,12 +58,23 @@ class ProjectService:
         status: Optional[ProjectStatus] = None,
         priority: Optional[ProjectPriority] = None,
         search: Optional[str] = None
-    ) -> List[Project]:
+    ) -> List[dict]:
         """Get projects accessible to user with filtering"""
-        # Get projects where user is owner or member
-        query = db.query(Project).join(ProjectMember).filter(
-            ProjectMember.user_id == user_id
-        )
+        from ..models.project import ProjectSummary
+        from ..models.task import Task, TaskStatus
+        
+        # Check if user is admin
+        user = db.query(User).filter(User.id == user_id).first()
+        is_admin = user and user.is_admin
+        
+        if is_admin:
+            # Admins can see all projects
+            query = db.query(Project)
+        else:
+            # Regular users can only see projects where they are owner or member
+            query = db.query(Project).join(ProjectMember).filter(
+                ProjectMember.user_id == user_id
+            )
         
         # Apply filters
         if status:
@@ -76,7 +91,29 @@ class ProjectService:
                 )
             )
         
-        return query.offset(skip).limit(limit).all()
+        projects = query.offset(skip).limit(limit).all()
+        
+        # Convert to ProjectSummary with calculated fields
+        project_summaries = []
+        for project in projects:
+            # Get tasks for this project
+            tasks = db.query(Task).filter(Task.project_id == project.id).all()
+            task_count = len(tasks)
+            completed_tasks = len([t for t in tasks if t.status == TaskStatus.DONE])
+            progress_percentage = (completed_tasks / task_count * 100) if task_count > 0 else 0
+            
+            project_summary = {
+                "id": project.id,
+                "name": project.name,
+                "status": project.status,
+                "priority": project.priority,
+                "task_count": task_count,
+                "completed_tasks": completed_tasks,
+                "progress_percentage": round(progress_percentage, 1)
+            }
+            project_summaries.append(project_summary)
+        
+        return project_summaries
     
     def update_project(self, db: Session, project_id: int, project_update: ProjectUpdate, user_id: int) -> Optional[Project]:
         """Update a project"""
@@ -280,13 +317,24 @@ class ProjectService:
                 "start_date": project.start_date.isoformat() if project.start_date else None,
                 "end_date": project.end_date.isoformat() if project.end_date else None,
                 "created_at": project.created_at.isoformat(),
-                "updated_at": project.updated_at.isoformat()
+                "updated_at": project.updated_at.isoformat() if project.updated_at else None
             },
             "ai_insights": ai_insights
         }
     
     def user_has_project_access(self, db: Session, project_id: int, user_id: int) -> bool:
         """Check if user has access to a project"""
+        # Check if user is admin (admins have access to all projects)
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_admin:
+            return True
+        
+        # Check if user is the project owner
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if project and project.owner_id == user_id:
+            return True
+        
+        # Then check if user is a project member
         member = db.query(ProjectMember).filter(
             and_(ProjectMember.project_id == project_id, ProjectMember.user_id == user_id)
         ).first()
@@ -297,6 +345,11 @@ class ProjectService:
         project = db.query(Project).filter(Project.id == project_id).first()
         if not project:
             return False
+        
+        # Check if user is system admin (admins can edit all projects)
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_admin:
+            return True
         
         # Owner can always edit
         if project.owner_id == user_id:
@@ -314,6 +367,11 @@ class ProjectService:
         project = db.query(Project).filter(Project.id == project_id).first()
         if not project:
             return False
+        
+        # Check if user is system admin (admins can manage all projects)
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_admin:
+            return True
         
         # Owner can always manage members
         if project.owner_id == user_id:

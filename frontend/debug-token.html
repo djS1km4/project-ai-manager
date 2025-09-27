@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Token</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .info { background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffebee; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #e8f5e8; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Debug Token Status</h1>
+    <div id="output"></div>
+    
+    <button onclick="checkToken()">Verificar Token</button>
+    <button onclick="clearStorage()">Limpiar Storage</button>
+    <button onclick="testAPI()">Probar API</button>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+
+        function isTokenExpired(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const currentTime = Date.now() / 1000;
+                return payload.exp < currentTime;
+            } catch (error) {
+                return true;
+            }
+        }
+
+        function checkToken() {
+            document.getElementById('output').innerHTML = '';
+            
+            const authStorage = localStorage.getItem('auth-storage');
+            
+            if (!authStorage) {
+                log('❌ No hay datos de autenticación en localStorage', 'error');
+                return;
+            }
+
+            try {
+                const parsedAuth = JSON.parse(authStorage);
+                log('📦 Datos de auth storage encontrados', 'success');
+                log(`<pre>${JSON.stringify(parsedAuth, null, 2)}</pre>`, 'info');
+
+                const token = parsedAuth.state?.token;
+                const isAuthenticated = parsedAuth.state?.isAuthenticated;
+
+                if (!token) {
+                    log('❌ No hay token en el storage', 'error');
+                    return;
+                }
+
+                log(`🔑 Token encontrado (${token.length} caracteres)`, 'success');
+                log(`🔐 Estado autenticado: ${isAuthenticated}`, 'info');
+
+                // Verificar expiración
+                const expired = isTokenExpired(token);
+                if (expired) {
+                    log('⏰ Token EXPIRADO', 'error');
+                } else {
+                    log('✅ Token VÁLIDO', 'success');
+                }
+
+                // Decodificar payload
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    log(`📋 Payload del token:`, 'info');
+                    log(`<pre>${JSON.stringify(payload, null, 2)}</pre>`, 'info');
+                    
+                    const expDate = new Date(payload.exp * 1000);
+                    log(`⏰ Expira: ${expDate.toLocaleString()}`, 'info');
+                } catch (e) {
+                    log('❌ Error decodificando token', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Error parseando storage: ${error.message}`, 'error');
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('auth-storage');
+            log('🗑️ Storage limpiado', 'success');
+        }
+
+        async function testAPI() {
+            const authStorage = localStorage.getItem('auth-storage');
+            
+            if (!authStorage) {
+                log('❌ No hay token para probar API', 'error');
+                return;
+            }
+
+            try {
+                const parsedAuth = JSON.parse(authStorage);
+                const token = parsedAuth.state?.token;
+
+                if (!token) {
+                    log('❌ No hay token válido', 'error');
+                    return;
+                }
+
+                // Probar endpoint de proyectos
+                const response = await fetch('/api/v1/projects/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`🌐 Respuesta API: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`📄 Error details: ${errorText}`, 'error');
+                } else {
+                    const data = await response.json();
+                    log(`📊 Datos recibidos: ${data.length} proyectos`, 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Error en API: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.onload = checkToken;
+    </script>
+</body>
+</html>

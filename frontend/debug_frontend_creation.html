@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Frontend Creation</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Debug Frontend Creation</h1>
+    <div id="status"></div>
+    <button onclick="testProjectCreation()">Test Project Creation</button>
+    <button onclick="testTaskCreation()">Test Task Creation</button>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = '/api/v1';
+        let authToken = null;
+
+        // Get auth token from localStorage (same format as the app)
+        function getAuthToken() {
+            const authStorage = localStorage.getItem('auth-storage');
+            if (authStorage) {
+                try {
+                    const parsedAuth = JSON.parse(authStorage);
+                    return parsedAuth.state?.token;
+                } catch (error) {
+                    console.error('Error parsing auth storage:', error);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        // Create axios instance with same config as app
+        const apiClient = axios.create({
+            baseURL: API_BASE,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // Add request interceptor
+        apiClient.interceptors.request.use(
+            (config) => {
+                const token = getAuthToken();
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            },
+            (error) => {
+                return Promise.reject(error);
+            }
+        );
+
+        // Add response interceptor
+        apiClient.interceptors.response.use(
+            (response) => {
+                console.log(`✅ Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
+                return response;
+            },
+            (error) => {
+                console.error(`❌ Error: ${error.response?.status} ${error.config?.method?.toUpperCase()} ${error.config?.url}`, error.response?.data);
+                return Promise.reject(error);
+            }
+        );
+
+        async function testProjectCreation() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            
+            statusDiv.innerHTML = '🔄 Testing project creation...';
+            
+            const projectData = {
+                name: 'Test Project Frontend',
+                description: 'Test project created from frontend debug',
+                start_date: '2024-01-15',
+                end_date: '2024-06-15',
+                budget: 50000,
+                status: 'planning'
+            };
+
+            try {
+                console.log('📤 Sending project data:', projectData);
+                const response = await apiClient.post('/projects/', projectData);
+                
+                statusDiv.innerHTML = '✅ Project creation successful!';
+                resultsDiv.innerHTML = `
+                    <h3>Success Response:</h3>
+                    <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                `;
+                
+                console.log('✅ Project created successfully:', response.data);
+                
+            } catch (error) {
+                statusDiv.innerHTML = '❌ Project creation failed!';
+                resultsDiv.innerHTML = `
+                    <h3>Error Response:</h3>
+                    <pre>Status: ${error.response?.status}
+Data: ${JSON.stringify(error.response?.data, null, 2)}
+Message: ${error.message}</pre>
+                `;
+                
+                console.error('❌ Project creation failed:', error);
+            }
+        }
+
+        async function testTaskCreation() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            
+            statusDiv.innerHTML = '🔄 Testing task creation...';
+            
+            const taskData = {
+                title: 'Test Task Frontend',
+                description: 'Test task created from frontend debug',
+                project_id: 1, // Assuming project ID 1 exists
+                priority: 'medium',
+                status: 'todo',
+                due_date: '2024-02-15',
+                estimated_hours: 8
+            };
+
+            try {
+                console.log('📤 Sending task data:', taskData);
+                const response = await apiClient.post('/tasks/', taskData);
+                
+                statusDiv.innerHTML = '✅ Task creation successful!';
+                resultsDiv.innerHTML = `
+                    <h3>Success Response:</h3>
+                    <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                `;
+                
+                console.log('✅ Task created successfully:', response.data);
+                
+            } catch (error) {
+                statusDiv.innerHTML = '❌ Task creation failed!';
+                resultsDiv.innerHTML = `
+                    <h3>Error Response:</h3>
+                    <pre>Status: ${error.response?.status}
+Data: ${JSON.stringify(error.response?.data, null, 2)}
+Message: ${error.message}</pre>
+                `;
+                
+                console.error('❌ Task creation failed:', error);
+            }
+        }
+
+        // Check auth status on load
+        window.onload = function() {
+            const token = getAuthToken();
+            const statusDiv = document.getElementById('status');
+            
+            if (token) {
+                statusDiv.innerHTML = `✅ Auth token found (length: ${token.length})`;
+            } else {
+                statusDiv.innerHTML = '❌ No auth token found. Please login first.';
+            }
+        };
+    </script>
+</body>
+</html>

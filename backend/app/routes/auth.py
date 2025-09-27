@@ -6,17 +6,46 @@ from typing import Dict, Any
 
 from ..database import get_db
 from ..models.user import User, UserCreate, UserLogin, UserResponse, Token, UserUpdate
+from ..models.project import ProjectCreate
 from ..services.auth_service import AuthService
+from ..services.project_service import ProjectService
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=Token)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     """Register a new user"""
     try:
+        # Create the user
         db_user = AuthService.create_user(db, user)
-        return db_user
+        
+        # Create an initial project for the new user
+        project_service = ProjectService()
+        initial_project = ProjectCreate(
+            name=f"Mi Primer Proyecto - {db_user.full_name or db_user.username}",
+            description="Este es tu proyecto inicial. Puedes editarlo o crear nuevos proyectos según tus necesidades.",
+            status="planning"
+        )
+        
+        try:
+            project_service.create_project(db, initial_project, db_user.id)
+        except Exception as project_error:
+            # Log the error but don't fail user creation
+            print(f"Warning: Could not create initial project for user {db_user.id}: {str(project_error)}")
+        
+        # Create access token for the new user
+        access_token_expires = timedelta(minutes=AuthService.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = AuthService.create_access_token(
+            data={"sub": str(db_user.id)}, expires_delta=access_token_expires
+        )
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "expires_in": AuthService.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            "user": db_user
+        }
     except HTTPException:
         raise
     except Exception as e:

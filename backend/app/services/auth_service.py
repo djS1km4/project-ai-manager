@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from ..models.user import User, UserCreate, UserUpdate
+from ..models.user import User, UserCreate, UserUpdate, UserAdminUpdate
 import os
 from dotenv import load_dotenv
 
@@ -18,6 +18,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AuthService:
+    ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """Verify a password against its hash"""
@@ -94,7 +95,6 @@ class AuthService:
             username=user.username,
             full_name=user.full_name,
             hashed_password=hashed_password,
-            role=user.role,
             is_active=True
         )
         
@@ -147,12 +147,13 @@ class AuthService:
     
     @staticmethod
     def change_user_role(db: Session, user_id: int, new_role: str) -> Optional[User]:
-        """Change user role"""
+        """Change user role (admin status)"""
         db_user = db.query(User).filter(User.id == user_id).first()
         if not db_user:
             return None
         
-        db_user.role = new_role
+        # Convert role to is_admin boolean
+        db_user.is_admin = (new_role == "admin")
         db.commit()
         db.refresh(db_user)
         return db_user
@@ -162,14 +163,15 @@ class AuthService:
         """Get current user from JWT token"""
         try:
             payload = AuthService.verify_token(token)
-            user_id: int = payload.get("sub")
-            if user_id is None:
+            user_id_str = payload.get("sub")
+            if user_id_str is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Could not validate credentials",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except JWTError:
+            user_id = int(user_id_str)
+        except (JWTError, ValueError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
@@ -200,24 +202,14 @@ class AuthService:
         
         # Check role-based permissions
         if required_role:
-            role_hierarchy = {
-                "admin": 3,
-                "manager": 2,
-                "member": 1,
-                "viewer": 0
-            }
-            
-            user_level = role_hierarchy.get(user.role, 0)
-            required_level = role_hierarchy.get(required_role, 0)
-            
-            if user_level < required_level:
+            # For this simplified model, only check if admin is required
+            if required_role == "admin" and not user.is_admin:
                 return False
         
         # Check specific permissions (if implemented)
         if required_permissions:
-            # This could be extended to check specific permissions
             # For now, we'll assume admin has all permissions
-            if user.role != "admin":
+            if not user.is_admin:
                 return False
         
         return True
@@ -255,3 +247,34 @@ class AuthService:
         user.hashed_password = AuthService.get_password_hash(new_password)
         db.commit()
         return True
+    
+    @staticmethod
+    def get_all_users(db: Session, skip: int = 0, limit: int = 100):
+        """Get all users (admin only)"""
+        return db.query(User).offset(skip).limit(limit).all()
+    
+    @staticmethod
+    def admin_update_user(db: Session, user_id: int, user_update: UserAdminUpdate) -> Optional[User]:
+        """Update user information (admin only)"""
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            return None
+        
+        update_data = user_update.dict(exclude_unset=True)
+        
+        for field, value in update_data.items():
+            setattr(db_user, field, value)
+        
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    
+    @staticmethod
+    def require_admin(current_user: User):
+        """Decorator/helper to require admin permissions"""
+        if not current_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin permissions required"
+            )
+        return current_user

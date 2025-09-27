@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Task Creation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        input, select, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Debug Task Creation</h1>
+        
+        <div id="authStatus" class="section info">
+            <h3>Estado de Autenticación</h3>
+            <div id="authInfo">Verificando...</div>
+        </div>
+
+        <div class="section">
+            <h3>1. Login</h3>
+            <button onclick="login()">Login como Admin</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>2. Cargar Datos</h3>
+            <button onclick="loadProjects()">Cargar Proyectos</button>
+            <button onclick="loadUsers()">Cargar Usuarios</button>
+            <button onclick="loadTasks()">Cargar Tareas</button>
+            <div id="dataResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>3. Crear Tarea</h3>
+            <form id="taskForm">
+                <div class="form-group">
+                    <label for="title">Título:</label>
+                    <input type="text" id="title" name="title" value="Tarea de prueba frontend" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Descripción:</label>
+                    <textarea id="description" name="description">Esta es una tarea creada desde el debug del frontend</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="project_id">Proyecto:</label>
+                    <select id="project_id" name="project_id" required>
+                        <option value="">Seleccionar proyecto...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignee_id">Asignado a:</label>
+                    <select id="assignee_id" name="assignee_id">
+                        <option value="">Sin asignar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="priority">Prioridad:</label>
+                    <select id="priority" name="priority" required>
+                        <option value="low">Baja</option>
+                        <option value="medium" selected>Media</option>
+                        <option value="high">Alta</option>
+                        <option value="critical">Crítica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Estado:</label>
+                    <select id="status" name="status" required>
+                        <option value="todo" selected>Por hacer</option>
+                        <option value="in_progress">En progreso</option>
+                        <option value="in_review">En revisión</option>
+                        <option value="done">Completado</option>
+                        <option value="cancelled">Cancelado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="due_date">Fecha límite:</label>
+                    <input type="date" id="due_date" name="due_date">
+                </div>
+                <div class="form-group">
+                    <label for="estimated_hours">Horas estimadas:</label>
+                    <input type="number" id="estimated_hours" name="estimated_hours" min="0" step="0.5">
+                </div>
+                <button type="submit">Crear Tarea</button>
+            </form>
+            <div id="taskResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>4. Resultados</h3>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8001/api/v1';
+        let authToken = null;
+        let projects = [];
+        let users = [];
+
+        // Verificar estado de autenticación al cargar
+        window.onload = function() {
+            checkAuthStatus();
+        };
+
+        function checkAuthStatus() {
+            const authStorage = localStorage.getItem('auth-storage');
+            const authInfo = document.getElementById('authInfo');
+            
+            if (authStorage) {
+                try {
+                    const parsed = JSON.parse(authStorage);
+                    authToken = parsed.state?.token;
+                    authInfo.innerHTML = `
+                        <strong>Token encontrado:</strong> ${authToken ? authToken.substring(0, 30) + '...' : 'null'}<br>
+                        <strong>Usuario:</strong> ${parsed.state?.user?.email || 'null'}<br>
+                        <strong>Autenticado:</strong> ${parsed.state?.isAuthenticated ? '✅' : '❌'}
+                    `;
+                } catch (e) {
+                    authInfo.innerHTML = '<span style="color: red;">Error al parsear auth storage</span>';
+                }
+            } else {
+                authInfo.innerHTML = '<span style="color: orange;">No hay datos de autenticación</span>';
+            }
+        }
+
+        async function login() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = 'Iniciando sesión...';
+
+            try {
+                const response = await fetch(`${BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@example.com',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.access_token;
+                    resultDiv.innerHTML = `<div class="success">✅ Login exitoso<br>Token: ${authToken.substring(0, 30)}...</div>`;
+                    checkAuthStatus();
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${data.detail || 'Error desconocido'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        async function loadProjects() {
+            if (!authToken) {
+                alert('Primero debes hacer login');
+                return;
+            }
+
+            const resultDiv = document.getElementById('dataResult');
+            resultDiv.innerHTML = 'Cargando proyectos...';
+
+            try {
+                const response = await fetch(`${BASE_URL}/projects/`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    projects = data;
+                    const projectSelect = document.getElementById('project_id');
+                    projectSelect.innerHTML = '<option value="">Seleccionar proyecto...</option>';
+                    
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+
+                    resultDiv.innerHTML = `<div class="success">✅ ${projects.length} proyectos cargados</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error cargando proyectos: ${data.detail || 'Error desconocido'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        async function loadUsers() {
+            if (!authToken) {
+                alert('Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/auth/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    users = data;
+                    const userSelect = document.getElementById('assignee_id');
+                    userSelect.innerHTML = '<option value="">Sin asignar</option>';
+                    
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = `${user.name || user.email}`;
+                        userSelect.appendChild(option);
+                    });
+
+                    document.getElementById('dataResult').innerHTML += `<div class="success">✅ ${users.length} usuarios cargados</div>`;
+                } else {
+                    document.getElementById('dataResult').innerHTML += `<div class="error">❌ Error cargando usuarios: ${data.detail || 'Error desconocido'}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('dataResult').innerHTML += `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        async function loadTasks() {
+            if (!authToken) {
+                alert('Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/tasks/`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('dataResult').innerHTML += `<div class="success">✅ ${data.length} tareas encontradas</div>`;
+                    
+                    if (data.length > 0) {
+                        const tasksHtml = data.map(task => 
+                            `<li>${task.title} (ID: ${task.id}, Status: ${task.status})</li>`
+                        ).join('');
+                        document.getElementById('dataResult').innerHTML += `<div class="info"><strong>Tareas:</strong><ul>${tasksHtml}</ul></div>`;
+                    }
+                } else {
+                    document.getElementById('dataResult').innerHTML += `<div class="error">❌ Error cargando tareas: ${data.detail || 'Error desconocido'}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('dataResult').innerHTML += `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('taskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!authToken) {
+                alert('Primero debes hacer login');
+                return;
+            }
+
+            const resultDiv = document.getElementById('taskResult');
+            resultDiv.innerHTML = 'Creando tarea...';
+
+            const formData = new FormData(e.target);
+            const taskData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                project_id: parseInt(formData.get('project_id')),
+                priority: formData.get('priority'),
+                status: formData.get('status'),
+                due_date: formData.get('due_date') || undefined,
+                estimated_hours: formData.get('estimated_hours') ? parseFloat(formData.get('estimated_hours')) : undefined,
+                assignee_id: formData.get('assignee_id') ? parseInt(formData.get('assignee_id')) : undefined
+            };
+
+            // Limpiar valores undefined
+            Object.keys(taskData).forEach(key => {
+                if (taskData[key] === undefined || taskData[key] === '') {
+                    delete taskData[key];
+                }
+            });
+
+            console.log('Enviando datos:', taskData);
+
+            try {
+                const response = await fetch(`${BASE_URL}/tasks/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(taskData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Tarea creada exitosamente<br>ID: ${data.id}<br><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                    document.getElementById('results').innerHTML = `<div class="success">✅ Última tarea creada: ${data.title} (ID: ${data.id})</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${data.detail || JSON.stringify(data)}<br><pre>Datos enviados: ${JSON.stringify(taskData, null, 2)}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

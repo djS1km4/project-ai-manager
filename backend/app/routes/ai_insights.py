@@ -28,10 +28,11 @@ def get_current_user(
 @router.post("/analyze-project/{project_id}")
 def analyze_project(
     project_id: int,
+    analysis_type: Optional[str] = Query(None, description="Specific analysis type: risk, progress, team, budget, or all"),
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Generate comprehensive AI analysis for a project"""
+    """Generate AI analysis for a project - specific type or comprehensive"""
     # Check if user has access to the project
     project_service = ProjectService()
     project = project_service.get_project(db, project_id, current_user.id)
@@ -43,11 +44,22 @@ def analyze_project(
     
     ai_service = AIProjectAnalysisService()
     try:
-        insights = ai_service.generate_project_insights(db, project_id)
-        return {
-            "message": "Project analysis completed successfully",
-            "insights": insights
-        }
+        if analysis_type and analysis_type != "all":
+            # Generate specific analysis type
+            insights = ai_service.generate_specific_analysis(db, project_id, analysis_type)
+            return {
+                "message": f"{analysis_type.title()} analysis completed successfully",
+                "analysis_type": analysis_type,
+                "insights": insights
+            }
+        else:
+            # Generate comprehensive analysis (all types)
+            insights = ai_service.generate_project_insights(db, project_id)
+            return {
+                "message": "Comprehensive project analysis completed successfully",
+                "analysis_type": "all",
+                "insights": insights
+            }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -72,7 +84,7 @@ def get_risk_assessment(
     
     ai_service = AIProjectAnalysisService()
     try:
-        risk_assessment = ai_service.analyze_project_risk(db, project_id)
+        risk_assessment = ai_service.analyze_project_risk(project_id, db)
         return risk_assessment
     except Exception as e:
         raise HTTPException(
@@ -98,7 +110,7 @@ def get_progress_prediction(
     
     ai_service = AIProjectAnalysisService()
     try:
-        prediction = ai_service.predict_project_completion(db, project_id)
+        prediction = ai_service.predict_project_completion(project_id, db)
         return prediction
     except Exception as e:
         raise HTTPException(
@@ -124,8 +136,98 @@ def get_team_performance_analysis(
     
     ai_service = AIProjectAnalysisService()
     try:
-        analysis = ai_service.analyze_team_performance(db, project_id)
+        analysis = ai_service.analyze_team_performance(project_id, db)
         return analysis
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error analyzing team performance: {str(e)}"
+        )
+
+@router.post("/project/{project_id}/analyze/risk")
+def analyze_project_risk_specific(
+    project_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate specific risk analysis for a project"""
+    # Check if user has access to the project
+    project_service = ProjectService()
+    project = project_service.get_project(db, project_id, current_user.id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found or access denied"
+        )
+    
+    ai_service = AIProjectAnalysisService()
+    try:
+        insights = ai_service.generate_specific_analysis(db, project_id, "risk")
+        return {
+            "message": "Risk analysis completed successfully",
+            "analysis_type": "risk",
+            "insights": insights
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error analyzing project risk: {str(e)}"
+        )
+
+@router.post("/project/{project_id}/analyze/progress")
+def analyze_project_progress_specific(
+    project_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate specific progress prediction for a project"""
+    # Check if user has access to the project
+    project_service = ProjectService()
+    project = project_service.get_project(db, project_id, current_user.id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found or access denied"
+        )
+    
+    ai_service = AIProjectAnalysisService()
+    try:
+        insights = ai_service.generate_specific_analysis(db, project_id, "progress")
+        return {
+            "message": "Progress prediction completed successfully",
+            "analysis_type": "progress",
+            "insights": insights
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error predicting project progress: {str(e)}"
+        )
+
+@router.post("/project/{project_id}/analyze/team")
+def analyze_project_team_specific(
+    project_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate specific team performance analysis for a project"""
+    # Check if user has access to the project
+    project_service = ProjectService()
+    project = project_service.get_project(db, project_id, current_user.id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found or access denied"
+        )
+    
+    ai_service = AIProjectAnalysisService()
+    try:
+        insights = ai_service.generate_specific_analysis(db, project_id, "team")
+        return {
+            "message": "Team performance analysis completed successfully",
+            "analysis_type": "team",
+            "insights": insights
+        }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -176,12 +278,39 @@ def get_project_insights(
             detail="Project not found or access denied"
         )
     
-    query = db.query(AIInsight).filter(AIInsight.project_id == project_id)
+    from ..models.project import Project
+    
+    query = db.query(AIInsight, Project.name.label('project_name')).join(
+        Project, AIInsight.project_id == Project.id
+    ).filter(AIInsight.project_id == project_id)
     
     if insight_type:
         query = query.filter(AIInsight.insight_type == insight_type)
     
-    insights = query.order_by(AIInsight.created_at.desc()).limit(limit).all()
+    insights_query = query.order_by(AIInsight.created_at.desc()).limit(limit).all()
+    
+    # Convert to list of dictionaries with project_name included
+    insights = []
+    for insight, project_name in insights_query:
+        insight_dict = AIInsightResponse(
+            id=insight.id,
+            project_id=insight.project_id,
+            project_name=project_name,
+            insight_type=insight.insight_type,
+            priority=insight.priority,
+            title=insight.title,
+            description=insight.description,
+            recommendations=insight.recommendations,
+            confidence_score=insight.confidence_score,
+            data_source=insight.data_source,
+            is_acknowledged=insight.is_acknowledged,
+            acknowledged_by=insight.acknowledged_by,
+            acknowledged_at=insight.acknowledged_at,
+            created_at=insight.created_at,
+            expires_at=insight.expires_at
+        )
+        insights.append(insight_dict)
+    
     return insights
 
 @router.get("/project/{project_id}/analytics", response_model=ProjectAnalyticsResponse)
@@ -203,7 +332,7 @@ def get_project_analytics(
     # Get the latest analytics record
     analytics = db.query(ProjectAnalytics).filter(
         ProjectAnalytics.project_id == project_id
-    ).order_by(ProjectAnalytics.created_at.desc()).first()
+    ).order_by(ProjectAnalytics.analysis_date.desc()).first()
     
     if not analytics:
         raise HTTPException(
@@ -231,10 +360,9 @@ def create_insight(
         )
     
     # Create the insight
-    db_insight = AIInsight(
-        project_id=project_id,
-        **insight.dict()
-    )
+    insight_data = insight.dict()
+    insight_data['project_id'] = project_id
+    db_insight = AIInsight(**insight_data)
     db.add(db_insight)
     db.commit()
     db.refresh(db_insight)
@@ -315,8 +443,8 @@ def get_dashboard_insights(
     """Get AI insights for user's dashboard"""
     # Get user's projects
     project_service = ProjectService()
-    user_projects = project_service.get_user_projects(db, current_user.id)
-    project_ids = [p.id for p in user_projects]
+    user_projects = project_service.get_projects(db, current_user.id)
+    project_ids = [p["id"] for p in user_projects]
     
     if not project_ids:
         return {
@@ -329,18 +457,44 @@ def get_dashboard_insights(
             }
         }
     
-    # Get insights from the last N days
+    # Get insights from the last N days with project information
     since_date = datetime.utcnow() - timedelta(days=days)
     
-    insights = db.query(AIInsight).filter(
+    from ..models.project import Project
+    
+    insights_query = db.query(AIInsight, Project.name.label('project_name')).join(
+        Project, AIInsight.project_id == Project.id
+    ).filter(
         AIInsight.project_id.in_(project_ids),
         AIInsight.created_at >= since_date
     ).order_by(AIInsight.created_at.desc()).limit(100).all()
     
+    # Convert to list of dictionaries with project_name included
+    insights = []
+    for insight, project_name in insights_query:
+        insight_dict = {
+            "id": insight.id,
+            "project_id": insight.project_id,
+            "project_name": project_name,
+            "insight_type": insight.insight_type,
+            "priority": insight.priority,
+            "title": insight.title,
+            "description": insight.description,
+            "recommendations": insight.recommendations,
+            "confidence_score": insight.confidence_score,
+            "data_source": insight.data_source,
+            "is_acknowledged": insight.is_acknowledged,
+            "acknowledged_by": insight.acknowledged_by,
+            "acknowledged_at": insight.acknowledged_at,
+            "created_at": insight.created_at,
+            "expires_at": insight.expires_at
+        }
+        insights.append(insight_dict)
+    
     # Categorize insights
-    risk_alerts = [i for i in insights if i.insight_type == "risk_assessment" and i.confidence_score > 0.7]
-    recommendations = [i for i in insights if i.insight_type == "recommendation"]
-    predictions = [i for i in insights if i.insight_type == "prediction"]
+    risk_alerts = [i for i in insights if i["insight_type"] == "risk_assessment" and i["confidence_score"] and i["confidence_score"] > 0.7]
+    recommendations = [i for i in insights if i["insight_type"] == "recommendation"]
+    predictions = [i for i in insights if i["insight_type"] == "prediction"]
     
     return {
         "insights": insights[:20],  # Return top 20 for dashboard
@@ -417,8 +571,8 @@ def get_insights_trends(
     """Get trends in AI insights over time"""
     # Get user's projects
     project_service = ProjectService()
-    user_projects = project_service.get_user_projects(db, current_user.id)
-    project_ids = [p.id for p in user_projects]
+    user_projects = project_service.get_projects(db, current_user.id)
+    project_ids = [p["id"] for p in user_projects]
     
     if not project_ids:
         return {"trends": [], "summary": {}}

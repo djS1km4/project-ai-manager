@@ -22,9 +22,9 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
-    owned_projects = relationship("Project", back_populates="owner", foreign_keys="Project.owner_id")
-    assigned_tasks = relationship("Task", back_populates="assignee", foreign_keys="Task.assignee_id")
-    created_tasks = relationship("Task", back_populates="creator", foreign_keys="Task.creator_id")
+    owned_projects = relationship("Project", back_populates="owner")
+    assigned_tasks = relationship("Task", back_populates="assignee", foreign_keys="[Task.assignee_id]")
+    created_tasks = relationship("Task", back_populates="creator", foreign_keys="[Task.creator_id]")
     project_memberships = relationship("ProjectMember", back_populates="user")
     comments = relationship("Comment", back_populates="author")
 
@@ -58,12 +58,32 @@ class UserResponse(UserBase):
         from_attributes = True
 
 class UserLogin(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user: UserResponse
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+# Admin-specific models
+class UserAdminUpdate(BaseModel):
+    is_active: Optional[bool] = None
+    is_admin: Optional[bool] = None
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+class UserListResponse(BaseModel):
+    id: int
+    email: str
+    username: str
+    full_name: str
+    is_active: bool
+    is_admin: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True

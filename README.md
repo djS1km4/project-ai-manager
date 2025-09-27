@@ -463,7 +463,7 @@ copies or substantial portions of the Software.
 
 **⭐ Si te gusta este proyecto, ¡dale una estrella! ⭐**
 
-**Desarrollado con ❤️ usando FastAPI, React y mucho café ☕**
+**Desarrollado con ❤️ usando FastAPI, React y mucho Té Negro 🍵**
 
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=tu-usuario.project-ai-manager)
 ![GitHub stars](https://img.shields.io/github/stars/tu-usuario/project-ai-manager?style=social)

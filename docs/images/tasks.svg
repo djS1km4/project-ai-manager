@@ -1,0 +1,131 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8fafc"/>
+  
+  <!-- Header -->
+  <rect width="1200" height="80" fill="#1e293b"/>
+  <text x="40" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Project AI Manager</text>
+  <text x="1000" y="50" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">djs1km4@gmail.com</text>
+  
+  <!-- Sidebar -->
+  <rect x="0" y="80" width="250" height="720" fill="#334155"/>
+  <text x="20" y="120" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Navegación</text>
+  
+  <!-- Sidebar Menu Items -->
+  <rect x="10" y="140" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="165" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">📊 Dashboard</text>
+  
+  <rect x="10" y="190" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="215" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">📁 Proyectos</text>
+  
+  <rect x="10" y="240" width="230" height="40" rx="5" fill="#3b82f6"/>
+  <text x="25" y="265" font-family="Arial, sans-serif" font-size="14" fill="white">✅ Tareas</text>
+  
+  <rect x="10" y="290" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="315" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">🤖 AI Assistant</text>
+  
+  <!-- Main Content Area -->
+  <rect x="250" y="80" width="950" height="720" fill="white"/>
+  
+  <!-- Tasks Title -->
+  <text x="280" y="130" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#1e293b">Tareas</text>
+  <text x="280" y="160" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Gestiona y organiza todas tus tareas</text>
+  
+  <!-- Add Task Button -->
+  <rect x="1020" y="110" width="130" height="40" rx="5" fill="#3b82f6"/>
+  <text x="1055" y="135" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">+ Nueva Tarea</text>
+  
+  <!-- Filter Tabs -->
+  <rect x="280" y="180" width="100" height="40" rx="5" fill="#3b82f6"/>
+  <text x="315" y="205" font-family="Arial, sans-serif" font-size="14" fill="white">Todas</text>
+  
+  <rect x="390" y="180" width="100" height="40" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="415" y="205" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Pendientes</text>
+  
+  <rect x="500" y="180" width="120" height="40" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="520" y="205" font-family="Arial, sans-serif" font-size="14" fill="#64748b">En Progreso</text>
+  
+  <rect x="630" y="180" width="120" height="40" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="650" y="205" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Completadas</text>
+  
+  <!-- Search Bar -->
+  <rect x="800" y="180" width="350" height="40" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="820" y="205" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">🔍 Buscar tareas...</text>
+  
+  <!-- Task List Header -->
+  <rect x="280" y="240" width="870" height="50" rx="5" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="300" y="270" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#475569">Tarea</text>
+  <text x="600" y="270" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#475569">Proyecto</text>
+  <text x="800" y="270" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#475569">Prioridad</text>
+  <text x="950" y="270" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#475569">Estado</text>
+  <text x="1080" y="270" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#475569">Fecha</text>
+  
+  <!-- Task 1 -->
+  <rect x="280" y="300" width="870" height="60" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="330" r="8" fill="#10b981"/>
+  <text x="320" y="325" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Implementar autenticación JWT</text>
+  <text x="320" y="345" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Configurar sistema de autenticación con tokens JWT</text>
+  <text x="600" y="335" font-family="Arial, sans-serif" font-size="14" fill="#64748b">E-commerce Platform</text>
+  <rect x="800" y="320" width="60" height="20" rx="10" fill="#ef4444"/>
+  <text x="820" y="333" font-family="Arial, sans-serif" font-size="12" fill="white">Alta</text>
+  <rect x="950" y="320" width="80" height="20" rx="10" fill="#10b981"/>
+  <text x="970" y="333" font-family="Arial, sans-serif" font-size="12" fill="white">Completada</text>
+  <text x="1080" y="335" font-family="Arial, sans-serif" font-size="12" fill="#64748b">27/09/2025</text>
+  
+  <!-- Task 2 -->
+  <rect x="280" y="370" width="870" height="60" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="400" r="8" fill="#f59e0b"/>
+  <text x="320" y="395" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Diseñar interfaz de usuario</text>
+  <text x="320" y="415" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Crear mockups y prototipos de la interfaz principal</text>
+  <text x="600" y="405" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Mobile Task Manager</text>
+  <rect x="800" y="390" width="60" height="20" rx="10" fill="#f59e0b"/>
+  <text x="815" y="403" font-family="Arial, sans-serif" font-size="12" fill="white">Media</text>
+  <rect x="950" y="390" width="80" height="20" rx="10" fill="#f59e0b"/>
+  <text x="965" y="403" font-family="Arial, sans-serif" font-size="12" fill="white">En Progreso</text>
+  <text x="1080" y="405" font-family="Arial, sans-serif" font-size="12" fill="#64748b">28/09/2025</text>
+  
+  <!-- Task 3 -->
+  <rect x="280" y="440" width="870" height="60" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="470" r="8" fill="#ef4444"/>
+  <text x="320" y="465" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Configurar base de datos</text>
+  <text x="320" y="485" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Configurar PostgreSQL y crear esquemas iniciales</text>
+  <text x="600" y="475" font-family="Arial, sans-serif" font-size="14" fill="#64748b">AI Dashboard</text>
+  <rect x="800" y="460" width="60" height="20" rx="10" fill="#ef4444"/>
+  <text x="820" y="473" font-family="Arial, sans-serif" font-size="12" fill="white">Alta</text>
+  <rect x="950" y="460" width="80" height="20" rx="10" fill="#ef4444"/>
+  <text x="975" y="473" font-family="Arial, sans-serif" font-size="12" fill="white">Pendiente</text>
+  <text x="1080" y="475" font-family="Arial, sans-serif" font-size="12" fill="#64748b">30/09/2025</text>
+  
+  <!-- Task 4 -->
+  <rect x="280" y="510" width="870" height="60" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="540" r="8" fill="#10b981"/>
+  <text x="320" y="535" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Documentar API endpoints</text>
+  <text x="320" y="555" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Crear documentación completa de la API REST</text>
+  <text x="600" y="545" font-family="Arial, sans-serif" font-size="14" fill="#64748b">API REST Service</text>
+  <rect x="800" y="530" width="60" height="20" rx="10" fill="#10b981"/>
+  <text x="820" y="543" font-family="Arial, sans-serif" font-size="12" fill="white">Baja</text>
+  <rect x="950" y="530" width="80" height="20" rx="10" fill="#10b981"/>
+  <text x="970" y="543" font-family="Arial, sans-serif" font-size="12" fill="white">Completada</text>
+  <text x="1080" y="545" font-family="Arial, sans-serif" font-size="12" fill="#64748b">25/09/2025</text>
+  
+  <!-- Task 5 -->
+  <rect x="280" y="580" width="870" height="60" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="610" r="8" fill="#8b5cf6"/>
+  <text x="320" y="605" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Integrar sistema de pagos</text>
+  <text x="320" y="625" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Implementar Stripe para procesamiento de pagos</text>
+  <text x="600" y="615" font-family="Arial, sans-serif" font-size="14" fill="#64748b">E-commerce Platform</text>
+  <rect x="800" y="600" width="60" height="20" rx="10" fill="#f59e0b"/>
+  <text x="815" y="613" font-family="Arial, sans-serif" font-size="12" fill="white">Media</text>
+  <rect x="950" y="600" width="80" height="20" rx="10" fill="#8b5cf6"/>
+  <text x="975" y="613" font-family="Arial, sans-serif" font-size="12" fill="white">Revisión</text>
+  <text x="1080" y="615" font-family="Arial, sans-serif" font-size="12" fill="#64748b">02/10/2025</text>
+  
+  <!-- Pagination -->
+  <text x="280" y="700" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Mostrando 5 de 23 tareas</text>
+  <rect x="1000" y="680" width="40" height="30" rx="5" fill="#3b82f6"/>
+  <text x="1015" y="700" font-family="Arial, sans-serif" font-size="14" fill="white">1</text>
+  <rect x="1050" y="680" width="40" height="30" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="1065" y="700" font-family="Arial, sans-serif" font-size="14" fill="#64748b">2</text>
+  <rect x="1100" y="680" width="40" height="30" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="1115" y="700" font-family="Arial, sans-serif" font-size="14" fill="#64748b">3</text>
+</svg>

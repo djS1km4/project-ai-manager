@@ -1,0 +1,107 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8fafc"/>
+  
+  <!-- Header -->
+  <rect width="1200" height="80" fill="#1e293b"/>
+  <text x="40" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Project AI Manager</text>
+  <text x="1000" y="50" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">djs1km4@gmail.com</text>
+  
+  <!-- Sidebar -->
+  <rect x="0" y="80" width="250" height="720" fill="#334155"/>
+  <text x="20" y="120" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Navegación</text>
+  
+  <!-- Sidebar Menu Items -->
+  <rect x="10" y="140" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="165" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">📊 Dashboard</text>
+  
+  <rect x="10" y="190" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="215" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">📁 Proyectos</text>
+  
+  <rect x="10" y="240" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="265" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">✅ Tareas</text>
+  
+  <rect x="10" y="290" width="230" height="40" rx="5" fill="#8b5cf6"/>
+  <text x="25" y="315" font-family="Arial, sans-serif" font-size="14" fill="white">🤖 AI Assistant</text>
+  
+  <!-- Main Content Area -->
+  <rect x="250" y="80" width="950" height="720" fill="white"/>
+  
+  <!-- AI Assistant Title -->
+  <text x="280" y="130" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#1e293b">AI Assistant</text>
+  <text x="280" y="160" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Tu asistente inteligente para gestión de proyectos</text>
+  
+  <!-- Chat Container -->
+  <rect x="280" y="180" width="870" height="500" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  
+  <!-- Chat Messages -->
+  <!-- AI Message 1 -->
+  <rect x="300" y="200" width="600" height="80" rx="8" fill="#f1f5f9"/>
+  <circle cx="320" cy="220" r="15" fill="#8b5cf6"/>
+  <text x="315" y="227" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">AI</text>
+  <text x="350" y="225" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">¡Hola! Soy tu asistente de IA. ¿En qué puedo ayudarte hoy?</text>
+  <text x="350" y="245" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">Puedo ayudarte con:</text>
+  <text x="350" y="265" font-family="Arial, sans-serif" font-size="14" fill="#64748b">• Análisis de proyectos y sugerencias de mejora</text>
+  <text x="820" y="270" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8">10:30 AM</text>
+  
+  <!-- User Message 1 -->
+  <rect x="450" y="300" width="600" height="60" rx="8" fill="#3b82f6"/>
+  <text x="470" y="325" font-family="Arial, sans-serif" font-size="14" fill="white">¿Puedes analizar el progreso de mi proyecto E-commerce Platform</text>
+  <text x="470" y="345" font-family="Arial, sans-serif" font-size="14" fill="white">y darme sugerencias para optimizar el desarrollo?</text>
+  <circle cx="1030" cy="320" r="15" fill="#1e293b"/>
+  <text x="1025" y="327" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">TU</text>
+  <text x="820" y="370" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8">10:32 AM</text>
+  
+  <!-- AI Message 2 -->
+  <rect x="300" y="390" width="700" height="120" rx="8" fill="#f1f5f9"/>
+  <circle cx="320" cy="410" r="15" fill="#8b5cf6"/>
+  <text x="315" y="417" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">AI</text>
+  <text x="350" y="415" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">📊 Análisis del proyecto E-commerce Platform:</text>
+  <text x="350" y="435" font-family="Arial, sans-serif" font-size="14" fill="#64748b">• Progreso actual: 75% (Excelente ritmo)</text>
+  <text x="350" y="455" font-family="Arial, sans-serif" font-size="14" fill="#64748b">• 15 tareas totales, 11 completadas, 4 pendientes</text>
+  <text x="350" y="475" font-family="Arial, sans-serif" font-size="14" fill="#64748b">• Tiempo estimado de finalización: 2 semanas</text>
+  <text x="350" y="495" font-family="Arial, sans-serif" font-size="14" fill="#10b981">✅ Sugerencias: Priorizar la integración de pagos y testing</text>
+  <text x="820" y="500" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8">10:33 AM</text>
+  
+  <!-- User Message 2 -->
+  <rect x="500" y="530" width="550" height="40" rx="8" fill="#3b82f6"/>
+  <text x="520" y="555" font-family="Arial, sans-serif" font-size="14" fill="white">Perfecto, ¿puedes crear una tarea para el testing automático?</text>
+  <circle cx="1030" cy="540" r="15" fill="#1e293b"/>
+  <text x="1025" y="547" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">TU</text>
+  <text x="820" y="580" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8">10:35 AM</text>
+  
+  <!-- AI Message 3 -->
+  <rect x="300" y="600" width="650" height="60" rx="8" fill="#f1f5f9"/>
+  <circle cx="320" cy="620" r="15" fill="#8b5cf6"/>
+  <text x="315" y="627" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">AI</text>
+  <text x="350" y="625" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">✅ Tarea creada: "Implementar testing automático con Jest y Cypress"</text>
+  <text x="350" y="645" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Asignada al proyecto E-commerce Platform con prioridad Alta</text>
+  <text x="820" y="650" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8">10:36 AM</text>
+  
+  <!-- Input Area -->
+  <rect x="280" y="700" width="870" height="60" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="300" y="720" width="750" height="20" rx="10" fill="#f8fafc"/>
+  <text x="320" y="735" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">Escribe tu mensaje aquí...</text>
+  
+  <!-- Send Button -->
+  <rect x="1070" y="715" width="60" height="30" rx="15" fill="#3b82f6"/>
+  <text x="1090" y="735" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Enviar</text>
+  
+  <!-- AI Features Panel -->
+  <rect x="280" y="780" width="870" height="1" fill="#e2e8f0"/>
+  
+  <!-- Quick Actions -->
+  <text x="1000" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1e293b">Acciones Rápidas</text>
+  
+  <rect x="1000" y="150" width="180" height="35" rx="5" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="1020" y="172" font-family="Arial, sans-serif" font-size="12" fill="#64748b">📊 Analizar proyecto</text>
+  
+  <rect x="1000" y="195" width="180" height="35" rx="5" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="1020" y="217" font-family="Arial, sans-serif" font-size="12" fill="#64748b">✅ Crear tarea</text>
+  
+  <rect x="1000" y="240" width="180" height="35" rx="5" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="1020" y="262" font-family="Arial, sans-serif" font-size="12" fill="#64748b">📈 Generar reporte</text>
+  
+  <rect x="1000" y="285" width="180" height="35" rx="5" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="1020" y="307" font-family="Arial, sans-serif" font-size="12" fill="#64748b">💡 Sugerencias</text>
+</svg>

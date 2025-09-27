@@ -10,7 +10,7 @@
 
 **Un sistema inteligente de gestión de proyectos potenciado por IA**
 
-[Demo en Vivo](#) • [Documentación](#) • [Reportar Bug](../../issues) • [Solicitar Feature](../../issues)
+[Demo en Vivo](#) • [Documentación](#) • [Reportar Bug](mailto:djs1km4@gmail.com) • [Solicitar Feature](mailto:djs1km4@gmail.com)
 
 </div>
 
@@ -352,17 +352,21 @@ Una vez que el backend esté ejecutándose, visita:
 
 <div align="center">
 
-### 🏠 Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
+### 🏠 Dashboard Principal
+![Dashboard](docs/images/dashboard.svg)
+*Vista general del dashboard con métricas en tiempo real y resumen de proyectos*
 
 ### 📁 Gestión de Proyectos
-![Projects](docs/screenshots/projects.png)
+![Projects](docs/images/projects.svg)
+*Interfaz completa para gestionar proyectos con filtros y búsqueda avanzada*
 
-### 🤖 IA Insights
-![AI Insights](docs/screenshots/ai-insights.png)
+### ✅ Gestión de Tareas
+![Tasks](docs/images/tasks.svg)
+*Sistema de tareas con estados, prioridades y seguimiento de progreso*
 
-### 📱 Responsive Design
-![Mobile](docs/screenshots/mobile.png)
+### 🤖 AI Assistant
+![AI Assistant](docs/images/ai-assistant.svg)
+*Asistente de IA integrado para análisis de proyectos y sugerencias inteligentes*
 
 </div>
 
@@ -398,7 +402,7 @@ Una vez que el backend esté ejecutándose, visita:
 
 ### 🐛 Reportar Bugs
 
-Usa el [sistema de issues](../../issues) para reportar bugs. Incluye:
+Envía un email a [djs1km4@gmail.com](mailto:djs1km4@gmail.com) para reportar bugs. Incluye:
 - Descripción detallada del problema
 - Pasos para reproducir
 - Comportamiento esperado vs actual
@@ -440,8 +444,8 @@ copies or substantial portions of the Software.
 
 ## 📞 Soporte y Contacto
 
-- 📧 **Email**: [tu-email@ejemplo.com](mailto:tu-email@ejemplo.com)
-- 🐛 **Issues**: [GitHub Issues](../../issues)
+- 📧 **Email**: [djs1km4@gmail.com](mailto:djs1km4@gmail.com)
+- 🐛 **Issues**: [djs1km4@gmail.com](mailto:djs1km4@gmail.com)
 - 💬 **Discusiones**: [GitHub Discussions](../../discussions)
 - 📖 **Wiki**: [Documentación Completa](../../wiki)
 

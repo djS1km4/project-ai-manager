@@ -1,0 +1,85 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8fafc"/>
+  
+  <!-- Header -->
+  <rect width="1200" height="80" fill="#1e293b"/>
+  <text x="40" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Project AI Manager</text>
+  <text x="1000" y="50" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">djs1km4@gmail.com</text>
+  
+  <!-- Sidebar -->
+  <rect x="0" y="80" width="250" height="720" fill="#334155"/>
+  <text x="20" y="120" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Navegación</text>
+  
+  <!-- Sidebar Menu Items -->
+  <rect x="10" y="140" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="165" font-family="Arial, sans-serif" font-size="14" fill="white">📊 Dashboard</text>
+  
+  <rect x="10" y="190" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="215" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">📁 Proyectos</text>
+  
+  <rect x="10" y="240" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="265" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">✅ Tareas</text>
+  
+  <rect x="10" y="290" width="230" height="40" rx="5" fill="#475569"/>
+  <text x="25" y="315" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">🤖 AI Assistant</text>
+  
+  <!-- Main Content Area -->
+  <rect x="250" y="80" width="950" height="720" fill="white"/>
+  
+  <!-- Dashboard Title -->
+  <text x="280" y="130" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#1e293b">Dashboard</text>
+  <text x="280" y="160" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Resumen general de tus proyectos y tareas</text>
+  
+  <!-- Stats Cards -->
+  <rect x="280" y="180" width="200" height="120" rx="8" fill="#3b82f6" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="300" y="210" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Total Proyectos</text>
+  <text x="300" y="260" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">12</text>
+  
+  <rect x="500" y="180" width="200" height="120" rx="8" fill="#10b981" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="520" y="210" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Tareas Completadas</text>
+  <text x="520" y="260" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">89</text>
+  
+  <rect x="720" y="180" width="200" height="120" rx="8" fill="#f59e0b" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="740" y="210" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Tareas Pendientes</text>
+  <text x="740" y="260" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">23</text>
+  
+  <rect x="940" y="180" width="200" height="120" rx="8" fill="#8b5cf6" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="960" y="210" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">AI Consultas</text>
+  <text x="960" y="260" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">156</text>
+  
+  <!-- Recent Projects Section -->
+  <text x="280" y="360" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Proyectos Recientes</text>
+  
+  <!-- Project Cards -->
+  <rect x="280" y="380" width="400" height="80" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="300" y="405" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1e293b">E-commerce Platform</text>
+  <text x="300" y="425" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Desarrollo de plataforma de comercio electrónico</text>
+  <rect x="300" y="435" width="60" height="20" rx="10" fill="#10b981"/>
+  <text x="315" y="448" font-family="Arial, sans-serif" font-size="12" fill="white">Activo</text>
+  
+  <rect x="700" y="380" width="400" height="80" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="720" y="405" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1e293b">Mobile App Development</text>
+  <text x="720" y="425" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Aplicación móvil para gestión de tareas</text>
+  <rect x="720" y="435" width="80" height="20" rx="10" fill="#f59e0b"/>
+  <text x="735" y="448" font-family="Arial, sans-serif" font-size="12" fill="white">En Progreso</text>
+  
+  <!-- Recent Tasks Section -->
+  <text x="280" y="520" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Tareas Recientes</text>
+  
+  <!-- Task List -->
+  <rect x="280" y="540" width="820" height="50" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="565" r="8" fill="#10b981"/>
+  <text x="320" y="570" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">Implementar autenticación JWT</text>
+  <text x="1000" y="570" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Completada</text>
+  
+  <rect x="280" y="600" width="820" height="50" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="625" r="8" fill="#f59e0b"/>
+  <text x="320" y="630" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">Diseñar interfaz de usuario</text>
+  <text x="1000" y="630" font-family="Arial, sans-serif" font-size="12" fill="#64748b">En Progreso</text>
+  
+  <rect x="280" y="660" width="820" height="50" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="300" cy="685" r="8" fill="#ef4444"/>
+  <text x="320" y="690" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">Configurar base de datos</text>
+  <text x="1000" y="690" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Pendiente</text>
+</svg>

@@ -352,6 +352,10 @@ Una vez que el backend esté ejecutándose, visita:
 
 <div align="center">
 
+### 🔐 Pantalla de Login
+![Login](./docs/images/login.png)
+*Interfaz de autenticación segura con validación de credenciales*
+
 ### 🏠 Dashboard Principal
 ![Dashboard](./docs/images/dashboard.png)
 *Vista general del dashboard con métricas en tiempo real y resumen de proyectos*

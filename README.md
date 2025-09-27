@@ -353,23 +353,23 @@ Una vez que el backend esté ejecutándose, visita:
 <div align="center">
 
 ### 🏠 Dashboard Principal
-![Dashboard](docs/images/dashboard.png)
+![Dashboard](./docs/images/dashboard.png)
 *Vista general del dashboard con métricas en tiempo real y resumen de proyectos*
 
 ### 📁 Gestión de Proyectos
-![Projects](docs/images/projects.png)
+![Projects](./docs/images/projects.png)
 *Interfaz completa para gestionar proyectos con filtros y búsqueda avanzada*
 
 ### ✅ Gestión de Tareas
-![Tasks](docs/images/tasks.png)
+![Tasks](./docs/images/tasks.png)
 *Sistema de tareas con estados, prioridades y seguimiento de progreso*
 
 ### 🤖 Asistente de IA
-![AI Assistant](docs/images/ai.png)
+![AI Assistant](./docs/images/ai.png)
 *Asistente de IA integrado para análisis de proyectos y sugerencias inteligentes*
 
 ### ⚙️ Panel de Administración
-![Admin Panel](docs/images/admin.png)
+![Admin Panel](./docs/images/admin.png)
 *Panel de administración para gestión de usuarios y configuración del sistema*
 
 </div>

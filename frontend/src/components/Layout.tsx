@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react'
+import { ReactNode, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../services/authStore'
 import { useNotifications } from './Notification'
@@ -43,7 +43,7 @@ const Layout = ({ children }: LayoutProps) => {
     ...(user?.is_admin ? [{ name: 'Administración', href: '/admin/users', icon: Settings, description: 'Gestión de usuarios' }] : []),
   ]
 
-  const isActive = (path: string) => location.pathname === path
+
 
   return (
     <div className="min-h-screen gradient-bg">

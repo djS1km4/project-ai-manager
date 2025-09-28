@@ -7,10 +7,6 @@ import {
   Shield, 
   ShieldOff,
   Search,
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
   Star
 } from 'lucide-react'
 import { apiClient } from '../services/apiClient'
@@ -27,11 +23,7 @@ interface User {
   updated_at: string
 }
 
-interface UserUpdate {
-  full_name?: string
-  email?: string
-  is_active?: boolean
-}
+
 
 export default function AdminUsersPage() {
   const { token } = useAuthToken()

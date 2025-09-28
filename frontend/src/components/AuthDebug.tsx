@@ -5,7 +5,7 @@ export const AuthDebug = () => {
   const { user, token, isAuthenticated } = useAuthStore()
   const { isReady, hasHydrated } = useAuthToken()
 
-  if (process.env.NODE_ENV === 'production') {
+  if (import.meta.env.PROD) {
     return null
   }
 

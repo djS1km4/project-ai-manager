@@ -119,9 +119,6 @@ apiClient.interceptors.response.use(
             document.body.removeChild(notification)
             window.location.href = '/login'
           }, 2000)
-        } else {
-          // Fallback for non-browser environments
-          window.location.href = '/login'
         }
       } else {
         console.log('🔍 Auth error but not token-related:', errorMessage)

@@ -11,7 +11,7 @@ import {
   Flag, 
   CheckCircle, 
   Clock,
-  MoreVertical,
+
   Edit,
   Trash2,
   User,
@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { apiClient } from '../services/apiClient'
 import { useAuthToken } from '../hooks/useAuthToken'
+import { useAuthStore } from '../services/authStore'
 import toast from 'react-hot-toast'
 
 const taskSchema = z.object({
@@ -73,10 +74,11 @@ const TasksPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const queryClient = useQueryClient()
   const { isReady } = useAuthToken()
+  const { user } = useAuthStore()
 
-  const { data: tasks, isLoading, error: tasksError } = useQuery({
-    queryKey: ['tasks', searchTerm, statusFilter, priorityFilter, projectFilter],
-    queryFn: async () => {
+  const { data: tasks = [], isLoading, error: tasksError } = useQuery({
+    queryKey: ['tasks', searchTerm, statusFilter, priorityFilter, projectFilter] as const,
+    queryFn: async (): Promise<Task[]> => {
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       if (statusFilter !== 'all') params.append('status', statusFilter)
@@ -87,48 +89,24 @@ const TasksPage = () => {
       return response.data as Task[]
     },
     enabled: isReady,
-    onError: (error: any) => {
-      console.error('Error loading tasks:', error)
-      toast.error('Error al cargar las tareas')
-    },
   })
 
-  const { data: projects, error: projectsError } = useQuery({
-    queryKey: ['projects-list'],
-    queryFn: async () => {
+  const { data: projects = [], error: projectsError } = useQuery({
+    queryKey: ['projects-list'] as const,
+    queryFn: async (): Promise<Project[]> => {
       const response = await apiClient.get('/projects/')
       return response.data as Project[]
     },
     enabled: isReady,
-    onError: (error: any) => {
-      console.error('Error loading projects:', error)
-      toast.error('Error al cargar los proyectos')
-    },
   })
 
-  const { data: users } = useQuery({
-    queryKey: ['users-list'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get('/auth/users')
-        return response.data as { id: number; name: string; email: string }[]
-      } catch (error: any) {
-        // Si no tiene permisos para ver usuarios, devolver array vacío
-        if (error.response?.status === 403) {
-          console.log('No permissions to load users list - using empty list')
-          return []
-        }
-        throw error
-      }
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'] as const,
+    queryFn: async (): Promise<{ id: number; name: string; email: string }[]> => {
+      const response = await apiClient.get('/users/')
+      return response.data
     },
-    enabled: isReady,
-    onError: (error: any) => {
-      console.error('Error loading users:', error)
-      // No mostrar toast para errores de permisos
-      if (error.response?.status !== 403) {
-        toast.error('Error al cargar los usuarios')
-      }
-    },
+    enabled: isReady && user?.is_admin,
   })
 
   const createTaskMutation = useMutation({
@@ -136,7 +114,7 @@ const TasksPage = () => {
       const response = await apiClient.post('/tasks/', data)
       return response.data
     },
-    onSuccess: (newTask) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       queryClient.invalidateQueries({ queryKey: ['tasks-list'] })
       setIsModalOpen(false)
@@ -158,7 +136,7 @@ const TasksPage = () => {
       const response = await apiClient.put(`/tasks/${id}`, data)
       return response.data
     },
-    onSuccess: (updatedTask) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       queryClient.invalidateQueries({ queryKey: ['tasks-list'] })
       setIsModalOpen(false)
@@ -312,7 +290,7 @@ const TasksPage = () => {
   }
 
   const filteredAndSortedTasks = tasks
-    ?.filter(task => {
+    .filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            (task.description || '').toLowerCase().includes(searchTerm.toLowerCase())
       const matchesStatus = statusFilter === 'all' || task.status === statusFilter
@@ -320,7 +298,7 @@ const TasksPage = () => {
       const matchesProject = projectFilter === 'all' || task.project_id.toString() === projectFilter
       return matchesSearch && matchesStatus && matchesPriority && matchesProject
     })
-    ?.sort((a, b) => {
+    .sort((a, b) => {
       let aValue: any, bValue: any
       
       switch (sortBy) {
@@ -492,7 +470,7 @@ const TasksPage = () => {
               className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-soft text-dark-700 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-300 hover:bg-gray-100 appearance-none cursor-pointer font-sans"
             >
               <option value="all">Todos los Proyectos</option>
-              {projects?.map((project) => (
+              {projects.map((project) => (
                 <option key={project.id} value={project.id.toString()}>
                   {project.name}
                 </option>
@@ -561,7 +539,7 @@ const TasksPage = () => {
         </div>
       ) : (
         <div className="space-y-6">
-          {filteredAndSortedTasks?.map((task, index) => {
+          {filteredAndSortedTasks.map((task) => {
             const PriorityIcon = getPriorityIcon(task.priority)
             return (
               <div 
@@ -705,7 +683,7 @@ const TasksPage = () => {
                 </label>
                 <select {...register('project_id', { valueAsNumber: true })} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-soft text-dark-700 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200 hover:bg-gray-100 font-sans">
                   <option value="" className="bg-white text-secondary-500">Seleccionar proyecto</option>
-                  {projects?.map((project) => (
+                  {projects.map((project) => (
                     <option key={project.id} value={project.id} className="bg-white text-dark-700">
                       {project.name}
                     </option>
@@ -725,7 +703,7 @@ const TasksPage = () => {
                 </label>
                 <select {...register('assignee_id', { valueAsNumber: true })} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-soft text-dark-700 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200 hover:bg-gray-100 font-sans">
                   <option value="" className="bg-white text-secondary-500">Sin asignar</option>
-                  {users?.map((user) => (
+                  {users.map((user) => (
                     <option key={user.id} value={user.id} className="bg-white text-dark-700">
                       {user.name} ({user.email})
                     </option>

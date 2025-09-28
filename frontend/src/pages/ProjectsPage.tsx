@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,10 +13,6 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Eye,
-  Clock,
-  CheckCircle,
-  AlertCircle,
   X,
   Star,
   FolderOpen,
@@ -585,13 +581,13 @@ const ProjectsPage = () => {
                     Tareas: {project.completed_tasks || 0}/{project.task_count || 0}
                   </span>
                   <span className="text-gray-500">
-                    {project.progress_percentage || 0}% completado
+                    {project.progress || 0}% completado
                   </span>
                 </div>
                 <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${project.progress_percentage || 0}%` }}
+                    style={{ width: `${project.progress || 0}%` }}
                   ></div>
                 </div>
               </div>

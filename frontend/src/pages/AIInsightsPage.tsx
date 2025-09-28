@@ -10,7 +10,6 @@ import {
   RefreshCw,
   Lightbulb,
   Clock,
-  CheckCircle,
   Sparkles,
   Zap,
   Shield,
@@ -36,25 +35,7 @@ interface AIInsight {
   data_source?: string
 }
 
-interface ProjectAnalysis {
-  project_id: number
-  project_name: string
-  risk_assessment: {
-    level: string
-    factors: string[]
-    recommendations: string[]
-  }
-  progress_prediction: {
-    completion_probability: number
-    estimated_completion_date: string
-    potential_delays: string[]
-  }
-  team_performance: {
-    productivity_score: number
-    bottlenecks: string[]
-    suggestions: string[]
-  }
-}
+
 
 const AIInsightsPage = () => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null)
@@ -199,23 +180,9 @@ const AIInsightsPage = () => {
     return 'text-red-700 bg-red-100 border-red-200'
   }
 
-  const getRiskColor = (level: string) => {
-    switch (level.toLowerCase()) {
-      case 'low': return 'text-success-700 bg-success-100 border-success-200'
-      case 'medium': return 'text-warning-700 bg-warning-100 border-warning-200'
-      case 'high': return 'text-danger-700 bg-danger-100 border-danger-200'
-      default: return 'text-gray-700 bg-gray-100 border-gray-200'
-    }
-  }
 
-  const getAnalysisTypeIcon = (type: string) => {
-    switch (type) {
-      case 'risk': return <Shield className="h-5 w-5" />
-      case 'progress': return <Activity className="h-5 w-5" />
-      case 'team': return <Users className="h-5 w-5" />
-      default: return <Brain className="h-5 w-5" />
-    }
-  }
+
+
 
   const getAnalysisTypeText = (type: string) => {
     switch (type) {
@@ -473,7 +440,7 @@ const AIInsightsPage = () => {
           </div>
         ) : insights && insights.length > 0 ? (
           <div className="space-y-4">
-            {insights.slice(0, 10).map((insight, index) => {
+            {insights.slice(0, 10).map((insight) => {
               const colors = getInsightColors(insight.insight_type)
               return (
                 <div key={insight.id} className={`${colors.bg} border ${colors.border} rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]`}>

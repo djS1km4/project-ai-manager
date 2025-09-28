@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+
 import { 
-  BarChart, 
-  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -22,11 +20,8 @@ import {
   AlertTriangle,
   TrendingUp,
   TrendingDown,
-  Users,
   Calendar,
   DollarSign,
-  ArrowRight,
-  Folder,
   CheckSquare,
   BarChart3,
   Pause,
@@ -70,8 +65,8 @@ const DashboardPage = () => {
   })
 
   const { data: projectsData, isLoading: projectsLoading } = useQuery({
-    queryKey: ['dashboard-projects'],
-    queryFn: async () => {
+    queryKey: ['dashboard-projects'] as const,
+    queryFn: async (): Promise<any[]> => {
       const response = await apiClient.get('/projects/?limit=5')
       return response.data
     },
@@ -79,8 +74,8 @@ const DashboardPage = () => {
   })
 
   const { data: tasksData, isLoading: tasksLoading } = useQuery({
-    queryKey: ['dashboard-tasks'],
-    queryFn: async () => {
+    queryKey: ['dashboard-tasks'] as const,
+    queryFn: async (): Promise<any[]> => {
       const response = await apiClient.get('/tasks/?limit=10')
       return response.data
     },
@@ -103,10 +98,7 @@ const DashboardPage = () => {
     return `${sign}${Math.max(1, Math.min(trend, 25))}%`
   }
 
-  const getProjectCompletionRate = () => {
-    if (!stats?.totalProjects) return '0%'
-    return `${Math.round((stats.completedProjects / stats.totalProjects) * 100)}%`
-  }
+
 
   const getTaskCompletionRate = () => {
     if (!stats?.totalTasks) return '0%'
@@ -228,7 +220,7 @@ const DashboardPage = () => {
              trend: stats?.onHoldProjects ? calculateTrend(stats.onHoldProjects, stats.totalProjects || 1, 'negative') : '0%',
              delay: 'delayed-animation-5'
            }
-         ].map((stat, index) => {
+         ].map((stat) => {
           const Icon = stat.icon
           return (
             <div
@@ -429,7 +421,7 @@ const DashboardPage = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {projectsData?.slice(0, 3).map((project, index) => (
+              {projectsData?.slice(0, 3).map((project: any) => (
                 <div 
                   key={project.id} 
                   className="flex items-center gap-6 p-6 rounded-xl bg-gray-50 border border-gray-100 hover:bg-gray-100 transition-colors"
@@ -485,7 +477,7 @@ const DashboardPage = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {tasksData?.slice(0, 3).map((task, index) => (
+              {tasksData?.slice(0, 5).map((task: any) => (
                 <div 
                   key={task.id} 
                   className="flex items-center gap-6 p-6 rounded-xl bg-gray-50 border border-gray-100 hover:bg-gray-100 transition-colors"
